@@ -1,10 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar'; // Import the Navbar component
 
 const Home = ({ user, onLogout }) => {
   const [showAddBlog, setShowAddBlog] = useState(false);
   const [blogs, setBlogs] = useState([]); // State to store blogs
   const [blogContent, setBlogContent] = useState(''); // Input for new blog content
+
+  // Load blogs from localStorage when the component mounts
+  useEffect(() => {
+    const storedBlogs = JSON.parse(localStorage.getItem('blogs'));
+    if (storedBlogs) {
+      setBlogs(storedBlogs);
+    }
+
+    // Check if the user is visiting for the first time
+    const isFirstVisit = localStorage.getItem('isFirstVisit');
+    if (!isFirstVisit) {
+      alert(
+        'Welcome to Stories! Here, you can tell your stories without mentioning your name to everyone.'
+      );
+      localStorage.setItem('isFirstVisit', 'true'); // Set the flag to indicate first visit
+    }
+  }, []);
 
   // Handle adding a blog
   const handleAddBlog = () => {
@@ -14,7 +31,9 @@ const Home = ({ user, onLogout }) => {
         content: blogContent,
         userEmail: user.email,
       };
-      setBlogs([...blogs, newBlog]);
+      const updatedBlogs = [...blogs, newBlog];
+      setBlogs(updatedBlogs);
+      localStorage.setItem('blogs', JSON.stringify(updatedBlogs)); // Save to localStorage
       setBlogContent('');
       setShowAddBlog(false);
     }
@@ -26,14 +45,14 @@ const Home = ({ user, onLogout }) => {
 
       <div className="container mx-auto p-6">
         <h2 className="text-3xl font-bold text-gray-800 text-center mb-6">
-          Welcome to the Blog Page
+          Welcome to the Story Page
         </h2>
         <div className="text-center mb-4">
           <button
             onClick={() => setShowAddBlog(!showAddBlog)}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
           >
-            {showAddBlog ? 'Cancel' : 'Add Blog'}
+            {showAddBlog ? 'Cancel' : 'Add Story'}
           </button>
         </div>
 
@@ -59,7 +78,7 @@ const Home = ({ user, onLogout }) => {
         {/* Display Blogs */}
         <div className="space-y-4">
           {blogs.length === 0 ? (
-            <p className="text-center text-gray-600">No blogs yet. Add a new one!</p>
+            <p className="text-center text-gray-600">No Stories yet. Add a new one!</p>
           ) : (
             blogs.map((blog) => (
               <div
