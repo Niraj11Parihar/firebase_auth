@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './firebase/firebase'; // Your firebase config
+import Navbar from './components/Navbar';
 import Home from './components/home';
 import Login from './features/auth/login';
-import Auth from './features/auth/registration';
-import { auth } from './firebase/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -16,31 +16,20 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  const handleLogout = () => {
-    setUser(null); // Clear the user state on logout
-  };
-
-  const handleLoginSuccess = (loggedInUser) => {
-    setUser(loggedInUser); // Set the user state on login success
-  };
-
   return (
-    <BrowserRouter>
+    <Router>
+      <Navbar user={user} onLogout={() => setUser(null)} />
       <Routes>
         <Route
           path="/"
-          element={user ? <Home user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
+          element={user ? <Home user={user} /> : <Navigate to="/login" />}
         />
         <Route
           path="/login"
-          element={!user ? <Login onLoginSuccess={handleLoginSuccess} /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/register"
-          element={!user ? <Auth /> : <Navigate to="/" />}
+          element={!user ? <Login onLoginSuccess={setUser} /> : <Navigate to="/" />}
         />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
 
